@@ -4,9 +4,11 @@ import org.sid.ebanckingbackend.entities.BankAccount;
 import org.sid.ebanckingbackend.entities.CurrentAccount;
 import org.sid.ebanckingbackend.entities.Customer;
 import org.sid.ebanckingbackend.enums.AccountStatus;
+import org.sid.ebanckingbackend.exceptions.CustomerNotfoundException;
 import org.sid.ebanckingbackend.repositories.AccountOperationRepository;
 import org.sid.ebanckingbackend.repositories.BankAccountRepository;
 import org.sid.ebanckingbackend.repositories.CustomerRepository;
+import org.sid.ebanckingbackend.services.BankAccountService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +25,28 @@ public class EbanckingBackendApplication {
 	}
 
     @Bean
+    CommandLineRunner commandLineRunner(BankAccountService bankAccountService){
+        return args -> {
+           Stream.of("Hassan","Imane","Mohamed").forEach(name->{
+               Customer customer=new customer();
+               customer.setName(name);
+               customer.setEmail(name+"@gmail.com");
+               bankAccountService.saveCustomer(customer);
+
+           });
+           bankAccountService.listCustomer().forEach(customer -> {
+              try {
+                  bankAccountService.saveCurrentBankAccount(Math.random()*9000,9000,customer.getId());
+                  bankAccountService.saveSavingBankAccount(Math.random()*12000, 5.5, customer.getId());
+              }
+              catch (CustomerNotfoundException e){
+                  e.printStackTrace();
+              }
+           });
+        };
+    }
+
+    //@Bean
     CommandLineRunner start(CustomerRepository customerRepository, BankAccountRepository bankAccountRepository,
                             AccountOperationRepository accountOperationRepository){
        return args -> {
